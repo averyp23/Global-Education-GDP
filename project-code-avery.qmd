@@ -1,0 +1,248 @@
+---
+title: "Global Education and GDP"
+author: "Avery Pratt" 
+institute: Spelman College WiSTEM 
+date: today
+date-format: short
+format: 
+  revealjs: 
+    theme: [default, slide-theme.scss]
+    embed-resources: true
+knitr:  
+  opts_chunk: 
+    include: true
+editor: visual
+---
+
+```{r}
+library(tidyverse) # this package has most of what we need
+library(readxl) # to read in excel files
+```
+
+```{r}
+#| include: false
+list.files("data/") #lists files for no errors in spelling
+education_data <-read_excel("data/Table-11-Education-SOWC2023.xlsx", range = "B4:AS222", na = c(" ", "-")) 
+gdp_data <-read_excel("data/World GDP Data New.xlsx", range = "A1:K227", na = c(" ", ".."))    
+
+
+
+```
+
+
+```{r}
+education_data <-  education_data |> 
+  rename(OOSR_1YR_M = `Out of School Rate 2013-2022-One year before primary entry age-Male`,
+         OOSR_1YR_F = `Out of School Rate 2013-2022-One year before primary entry age-Female`,
+         OOSR_P_M = `Out of School Rate 2013-2022-Primary Education-Male`,
+         OOSR_P_F = `Out of School Rate 2013-2022-Primary Education-Female`)
+```
+
+
+
+
+```{r}
+education_data <- education_data |> 
+  rename(OOSR_LS_M =  `Out of School Rate 2013-2022-Lower Secondary Education-Male`) 
+```
+
+
+```{r} 
+education_data <- education_data |> 
+  rename(OOSR_LS_F = `Out of School Rate 2013-2022-Lower Secondary Education-Female`) 
+
+education_data <- education_data |> 
+  rename(OOSR_US_M = `Out of School Rate 2013-2022-Upper Secondary Education-Male`) 
+
+education_data <- education_data |> 
+  rename(OOSR_US_F = `Out of School Rate 2013-2022-Upper Secondary Education-Female`) 
+
+education_data <- education_data |>
+  rename(CR_P_M = `Completion Rate 2013-2021-Primary Education-Male`)
+
+education_data <- education_data |> 
+  rename(CR_P_F = `Completion Rate 2013-2021-Primary Education-Female`) 
+```
+```{r}
+education_data <- education_data |> 
+  rename(CR_LS_M = `Completion Rate 2013-2021-Lower Secondary Education-Male`) 
+
+education_data <- education_data |> 
+  rename(CR_LS_F = `Completion Rate 2013-2021-Lower Secondary Education-Female`) 
+
+education_data <- education_data |> 
+  rename(CR_US_M = `Completion Rate 2013-2021-Upper Secondary Education-Male`) 
+
+education_data <- education_data |> 
+  rename(CR_US_F = `Completion Rate 2013-2021-Upper Secondary Eduacation-Female`)
+```
+
+
+```{r}
+education_data <- education_data |> 
+  rename(L_GR2_GR3_RE = `Learning Outcomes 2013-2022-Proportion of children in grade 2 or 3 achieving minimum proficiency level-Reading`) 
+
+education_data <- education_data |> 
+  rename(L_GR2_GR3_MA = `Learning Outcomes 2013-2022-Proportion of children in grade 2 or 3 achieving minimum proficiency level-Math`) 
+
+education_data <- education_data |> 
+  rename(L_P_RE = `Learning Outcomes 2013-2022-Proportion of children at the end of primary achieving a minimum proficiency level-Reading`) 
+
+education_data <- education_data |> 
+  rename(L_P_MA = `Learning Outcomes 2013-2022-Proportion of children at the end of primary achieving a minimum proficiency level-Math`) 
+
+education_data <- education_data |> 
+  rename(L_LS_RE = `Learning Outcomes 2013-2022-Proportion of children at the end of lower secondary achieving a minmum proficiency level-Reading`) 
+
+education_data <- education_data |> 
+  rename(L_LS_MA = `Learning Outcomes 2013-2022-Proportion of children at the end of lower secondary achieving a minimum proficiency level-Math`) 
+
+education_data <- education_data |> 
+  rename(LR_M = `Literacy Rate 2014-2022-Youth(15-24 years) Rate(%)-Male`) 
+
+education_data <- education_data |> 
+  rename(LR_F= `Literacy Rate 2014-2022-Youth(15-24 years) Rate(%)-Female`)
+```
+
+
+
+```{r}
+gdp_data <- gdp_data |> 
+  rename(GDP_2015 = `2015 GDP  $Billions`) 
+```
+```{r}
+gdp_data <- gdp_data |> 
+  rename(GDP_2022 = `2022 GDP $Billions`) 
+
+gdp_data <- gdp_data |> 
+  rename(GDP_2015_AG = `2015 % of GDP- Agriculture`) 
+
+gdp_data <- gdp_data |> 
+  rename(GDP_2022_AG = `2022 % of GDP-Agriculture`) 
+
+gdp_data <-gdp_data |> 
+  rename(GDP_2015_IN = `2015 % of GDP-Industry`) 
+
+gdp_data <- gdp_data |> 
+  rename(GDP_2022_IN = `2022 % of GDP-Industry`) 
+
+gdp_data <- gdp_data |> 
+  rename(GDP_2015_MA = `2015 % of GDP-Manufacturing`) 
+
+gdp_data <- gdp_data |> 
+  rename(GDP_2022_MA = `2022 % of GDP-Manufacturing`) 
+
+gdp_data <- gdp_data |> 
+  rename(GDP_2015_SE = `2015 % of GDP-Services`) 
+
+gdp_data <- gdp_data |> 
+  rename(GDP_2022_SE = `2022 % of GDP-Services`)
+```
+
+```{r} 
+#| eval: false
+education_data <- education_data |> 
+  select(-starts_with("..."))
+  pivot_longer(cols = ends_with("_M") | ends_with("_F"),
+               names_to = c(".value", "gender"),
+               names_sep = -2)
+```
+
+```{r}
+all_data <- full_join(x = education_data, 
+                      y = gdp_data,
+                      by = c("Countries and Areas" = "...1"))
+``` 
+```{r} 
+#| include: false
+ggplot(all_data, aes(x = LR_F)) +  
+  geom_histogram(binwidth = 5)
+
+``` 
+```{r} 
+#| include: false
+ggplot(all_data, aes(x = GDP_2022_SE)) +  
+  geom_histogram(binwidth = 5)
+``` 
+
+## Map of World 
+![](https://static.vecteezy.com/system/resources/previews/019/765/478/non_2x/world-map-with-country-location-free-vector.jpg)
+
+## The Question
+
+. . .
+
+How is the percentage of a country’s GDP Services and Literacy Rate Correlated?
+
+
+- A correlation could show a pattern in the relationship between GDP and Education Statistics
+
+- The economic state of a country could influence the education standards of the country, hence why we're comparing these two variables 
+
+## The Variables 
+
+. . . 
+
+Education: Literacy Rate of Females Across the World  
+
+. . . 
+
+- The number indicates the percentage of women who are literate in the respective country 
+
+. . . 
+
+GDP: Percentage of Services that make up GDP   
+
+. . .
+
+- The number indicates the percentage of GDP that is made up of services in the respective country 
+
+. . .
+
+- The GDP Data from the original database was split into Industry, Manufacturing and Services 
+
+## Education Sources  
+![UNICEF](education screenshot.png)
+
+## Education Sources 
+![UNICEF](education lr ss.png)
+
+## GDP Sources
+![World Bank](gdp ss.png)
+
+
+## GDP Sources 
+![World Bank](gdp services ss.png)
+
+## Results
+
+```{r}  
+#| include: true
+ggplot(all_data, aes(x = LR_F, y = GDP_2022_SE, color = GDP_2022_SE)) + 
+  geom_point(alpha = 0.5) +
+  # geom_text(aes(label = `Countries and Areas`))+
+  geom_smooth(method = "lm", color = "black") +
+  guides(color = "none") +
+  scale_color_gradient(low = "red", high = "blue") +
+  theme_light() + 
+  labs(x = "Literacy Rate for Women", y= "Percentage of GDP-Services") +
+  labs(title = "Countries with a GDP-S above 45% have a high Literacy Rate for Women") + 
+  theme_light(base_size = 16)
+```
+## Conclusion 
+
+. . .
+
+The results indicate a positive correlation between a high literacy rate and GDP of services in 2022
+
+. . . 
+
+- More research may need to be conducted to analyze the statistics further and identify outlines 
+
+. . .
+
+- The way a countries GDP is invested could potentially affect the educational standards, access, and data in a country  
+
+
+
+
